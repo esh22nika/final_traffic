@@ -14,7 +14,7 @@ MY_NAME = "p_signal"
 local_skew = -45 * 60
 
 # ZooKeeper IP (for RTO integration / monitoring)
-ZOOKEEPER_IP = "http://localhost:6000"
+ZOOKEEPER_IP = "http://192.168.0.168:6000"
 
 # Shared signal status (kept in sync with controllers)
 # This should be updated whenever controllers change states
@@ -201,3 +201,4 @@ if __name__ == "__main__":
         server.serve_forever()
     except KeyboardInterrupt:
         print(f"\n[{MY_NAME}] Shutting down...")
+
