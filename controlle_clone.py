@@ -11,8 +11,8 @@ import uuid
 # ---------------- CONFIG ----------------
 # Note: Clone has different port and name, but same functionality
 CLIENTS = {
-    "t_signal": "http://localhost:7000",
-    "p_signal": "http://localhost:9000",
+    "t_signal": "http://192.168.0.165:7000",
+    "p_signal": "http://192.168.0.176:9000",
 }
 PEDESTRIAN_IP = CLIENTS["p_signal"]
 RESPONSE_TIMEOUT = 15
@@ -492,4 +492,5 @@ if __name__ == "__main__":
         server.serve_forever()
     except KeyboardInterrupt:
         log_separator("SHUTDOWN", "👋")
+
         print(f"\n[{CONTROLLER_NAME}] Shutting down...")
