@@ -66,8 +66,8 @@ if __name__ == "__main__":
         server.register_function(replica_server.update_signal_status, "update_signal_status")
         server.register_function(replica_server.update_controller_status, "update_controller_status")
 
-        print(f"✅ Replica server {replica_id} ready on port {port}")
+        print(f"Replica server {replica_id} ready on port {port}")
         server.serve_forever()
     except Exception as e:
-        print(f"❌ Failed to start replica server: {e}")
+        print(f"Failed to start replica server: {e}")
         sys.exit(1)
