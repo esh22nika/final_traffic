@@ -194,7 +194,7 @@ def vip_arrival(target_pair, priority=1, vehicle_id=None):
 
 def _process_vip_requests():
     """Process all pending VIP requests with proper prioritization"""
-    log_separator("RICART-AGRAWALA VIP PROCESSING", "🔐")
+    log_separator("RICART-AGRAWALA VIP PROCESSING")
 
     while True:
         with state_lock:
@@ -202,7 +202,7 @@ def _process_vip_requests():
             has_34 = len(vip_queues["34"]) > 0
 
         if not (has_12 or has_34):
-            print("[RICART-AGRAWALA] ✅ All VIPs processed - releasing critical section")
+            print("[RICART-AGRAWALA] All VIPs processed - releasing critical section")
             break
 
         if has_12 and has_34:
@@ -215,13 +215,13 @@ def _process_vip_requests():
                 type_12 = get_vehicle_type(vip_12.priority)
                 type_34 = get_vehicle_type(vip_34.priority)
                 print(
-                    f"[RICART-AGRAWALA] 🏆 Deadlock resolved: {type_12} {vip_12.vehicle_id} [P{vip_12.priority}] > {type_34} {vip_34.vehicle_id} [P{vip_34.priority}]")
+                    f"[RICART-AGRAWALA] Deadlock resolved: {type_12} {vip_12.vehicle_id} [P{vip_12.priority}] > {type_34} {vip_34.vehicle_id} [P{vip_34.priority}]")
                 _serve_next_vip([1, 2])
             else:
                 type_12 = get_vehicle_type(vip_12.priority)
                 type_34 = get_vehicle_type(vip_34.priority)
                 print(
-                    f"[RICART-AGRAWALA] 🏆 Deadlock resolved: {type_34} {vip_34.vehicle_id} [P{vip_34.priority}] > {type_12} {vip_12.vehicle_id} [P{vip_12.priority}]")
+                    f"[RICART-AGRAWALA] Deadlock resolved: {type_34} {vip_34.vehicle_id} [P{vip_34.priority}] > {type_12} {vip_12.vehicle_id} [P{vip_12.priority}]")
                 _serve_next_vip([3, 4])
 
         elif has_12:
@@ -240,46 +240,46 @@ def _serve_next_vip(pair):
         vip = vip_queues[key].pop(0)
 
     vehicle_type = get_vehicle_type(vip.priority)
-    print(f"[RICART-AGRAWALA] 🎯 Next critical section access: {vehicle_type} {vip.vehicle_id} [P{vip.priority}]")
+    print(f"[RICART-AGRAWALA] Next critical section access: {vehicle_type} {vip.vehicle_id} [P{vip.priority}]")
 
     # Get p_signal acknowledgment for VIP requests too!
     if not _get_pedestrian_ack(pair, "VIP", f"{vehicle_type} {vip.vehicle_id}"):
-        print(f"[RICART-AGRAWALA] ❌ Permission denied for {vehicle_type} {vip.vehicle_id}")
+        print(f"[RICART-AGRAWALA] Permission denied for {vehicle_type} {vip.vehicle_id}")
         return
 
     # Enter critical section
-    print(f"[CRITICAL-SECTION] 🔐 {vehicle_type} {vip.vehicle_id} ACQUIRED intersection mutex [{CONTROLLER_NAME}]")
+    print(f"[CRITICAL-SECTION] {vehicle_type} {vip.vehicle_id} ACQUIRED intersection mutex [{CONTROLLER_NAME}]")
 
     # Switch to target pair if needed
     current_pair = _current_green_pair()
     if current_pair != pair:
-        print(f"[CRITICAL-SECTION] 🔄 Switching intersection: {current_pair} → {pair}")
+        print(f"[CRITICAL-SECTION] Switching intersection: {current_pair} → {pair}")
         _switch_to(pair)
     else:
-        print(f"[CRITICAL-SECTION] ✅ Intersection already configured for {pair}")
+        print(f"[CRITICAL-SECTION] Intersection already configured for {pair}")
 
     # Let VIP cross
     _let_vip_cross(vip)
 
-    print(f"[CRITICAL-SECTION] 🔓 {vehicle_type} {vip.vehicle_id} RELEASED intersection mutex [{CONTROLLER_NAME}]")
+    print(f"[CRITICAL-SECTION] {vehicle_type} {vip.vehicle_id} RELEASED intersection mutex [{CONTROLLER_NAME}]")
     log_vip_queues("After VIP Service")
 
 
 def _let_vip_cross(vip):
-    """Simulate VIP crossing"""
-    vehicle_type = get_vehicle_type(vip.priority)
-    print(f"[CRITICAL-SECTION] 🚑 {vehicle_type} {vip.vehicle_id} crossing intersection... ({VIP_CROSSING_TIME}s)")
-    print(f"[CRITICAL-SECTION] ⏳ {vehicle_type} {vip.vehicle_id} crossing... ")
+    def crossing_task():
+        vehicle_type = get_vehicle_type(vip.priority)
+        print(f"[CRITICAL-SECTION] {vehicle_type} {vip.vehicle_id} crossing intersection... ({VIP_CROSSING_TIME}s)")
+        time.sleep(VIP_CROSSING_TIME)
+        print(f"[CRITICAL-SECTION] {vehicle_type} {vip.vehicle_id} completed crossing")
+    threading.Thread(target=crossing_task, daemon=True).start()
 
-    time.sleep(VIP_CROSSING_TIME)
-    print(f"[CRITICAL-SECTION] ✅ {vehicle_type} {vip.vehicle_id} completed crossing")
 
 
 # ------------- Normal Traffic Handling ----
 def signal_controller(target_pair):
     """Handle normal (non-VIP) traffic requests"""
-    log_separator(f"NORMAL TRAFFIC REQUEST: {target_pair} [{CONTROLLER_NAME}]", "🚦")
-    print(f"[{CONTROLLER_NAME}] 📥 Request for intersection {target_pair}")
+    log_separator(f"NORMAL TRAFFIC REQUEST: {target_pair} [{CONTROLLER_NAME}]")
+    print(f"[{CONTROLLER_NAME}] Request for intersection {target_pair}")
 
     berkeley_cycle_once()
 
@@ -288,23 +288,23 @@ def signal_controller(target_pair):
         vip_count = len(vip_queues["12"]) + len(vip_queues["34"])
 
     if vip_count > 0:
-        print(f"[RICART-AGRAWALA] ⚠️ {vip_count} VIPs have higher priority - deferring normal traffic")
+        print(f"[RICART-AGRAWALA] {vip_count} VIPs have higher priority - deferring normal traffic")
         log_vip_queues("VIPs blocking normal traffic")
         _process_vip_requests()
-        print(f"[RICART-AGRAWALA] ✅ VIPs cleared - processing normal traffic")
+        print(f"[RICART-AGRAWALA] VIPs cleared - processing normal traffic")
 
     # Get p_signal acknowledgment
     if not _get_pedestrian_ack(target_pair, "normal", "Normal Traffic"):
         return False
 
     # Enter critical section for normal traffic
-    print(f"[CRITICAL-SECTION] 🔐 Normal traffic ACQUIRED intersection mutex for {target_pair} [{CONTROLLER_NAME}]")
+    print(f"[CRITICAL-SECTION] Normal traffic ACQUIRED intersection mutex for {target_pair} [{CONTROLLER_NAME}]")
 
     # Proceed with normal signal change
     _switch_to(target_pair)
 
-    print(f"[CRITICAL-SECTION] 🔓 Normal traffic RELEASED intersection mutex [{CONTROLLER_NAME}]")
-    print(f"[{CONTROLLER_NAME}] 🔁 Completed normal signal cycle.\n")
+    print(f"[CRITICAL-SECTION] Normal traffic RELEASED intersection mutex [{CONTROLLER_NAME}]")
+    print(f"[{CONTROLLER_NAME}] Completed normal signal cycle.\n")
     log_mutex_state()
     log_separator()
     return True
@@ -321,7 +321,7 @@ def handle_pedestrian_signals(target_pair):
     red_group = target_pair
     green_group = [3, 4] if target_pair == [1, 2] else [1, 2]
 
-    print(f"[{CONTROLLER_NAME}] ⚠️ Pedestrian {[f'P{x}' for x in red_group]} → BLINKING RED (5s)")
+    print(f"[{CONTROLLER_NAME}] Pedestrian {[f'P{x}' for x in red_group]} → BLINKING RED (5s)")
     for _ in range(5):
         with state_lock:
             for sig in red_group:
@@ -388,8 +388,8 @@ def log_mutex_state():
         vip_12_count = len(vip_queues["12"])
         vip_34_count = len(vip_queues["34"])
 
-    print(f"[MUTEX-STATE] 🔐 Current intersection holder: {current}")
-    print(f"[MUTEX-STATE] 📊 VIP queues: [1,2]={vip_12_count} | [3,4]={vip_34_count}")
+    print(f"[MUTEX-STATE] Current intersection holder: {current}")
+    print(f"[MUTEX-STATE] VIP queues: [1,2]={vip_12_count} | [3,4]={vip_34_count}")
 
 def ping():
     return "OK"
@@ -398,10 +398,10 @@ def ping():
 
 # ------------- Main Server ----------------
 if __name__ == "__main__":
-    log_separator(f"SMART TRAFFIC CONTROLLER STARTUP [{CONTROLLER_NAME}]", "🚦")
-    print(f"[{CONTROLLER_NAME}] 🎯 Features: Ricart-Agrawala Mutual Exclusion, VIP Priority, Berkeley Clock Sync")
-    print(f"[{CONTROLLER_NAME}] 🌐 Client configuration: {CLIENTS}")
-    print(f"[{CONTROLLER_NAME}] 🔄 Load balanced via ZooKeeper")
+    log_separator(f"SMART TRAFFIC CONTROLLER STARTUP [{CONTROLLER_NAME}]")
+    print(f"[{CONTROLLER_NAME}] Features: Ricart-Agrawala Mutual Exclusion, VIP Priority, Berkeley Clock Sync")
+    print(f"[{CONTROLLER_NAME}] Client configuration: {CLIENTS}")
+    print(f"[{CONTROLLER_NAME}] Load balanced via ZooKeeper")
 
     print("\n--- INITIAL STATE ---")
     log_mutex_state()
@@ -414,20 +414,19 @@ if __name__ == "__main__":
     server.register_function(get_signal_status, "get_signal_status")
     server.register_function(get_vip_status, "get_vip_status")
 
-    log_separator("SERVER READY", "🎉")
-    print(f"[{CONTROLLER_NAME}] 🚦 RPC Server listening on port {CONTROLLER_PORT}")
-    print(f"[{CONTROLLER_NAME}] 📚 Ricart-Agrawala protocol active for mutual exclusion")
-    print(f"[{CONTROLLER_NAME}] 🚨 VIP prioritization with deadlock resolution enabled")
+    log_separator("SERVER READY")
+    print(f"[{CONTROLLER_NAME}] RPC Server listening on port {CONTROLLER_PORT}")
+    print(f"[{CONTROLLER_NAME}] Ricart-Agrawala protocol active for mutual exclusion")
+    print(f"[{CONTROLLER_NAME}] VIP prioritization with deadlock resolution enabled")
 
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        log_separator("SHUTDOWN", "👋")
+        log_separator("SHUTDOWN")
         print(f"\n[{CONTROLLER_NAME}] Shutting down...")
         current = _current_green_pair()  # Define current state before printing
         vip_12_count = len(vip_queues["12"])
         vip_34_count = len(vip_queues["34"])
 
-        print(f"[MUTEX-STATE] 🔐 Current intersection holder: {current}")
-
-        print(f"[MUTEX-STATE] 📊 VIP queues: [1,2]={vip_12_count} | [3,4]={vip_34_count}")
+        print(f"[MUTEX-STATE] Current intersection holder: {current}")
+        print(f"[MUTEX-STATE] VIP queues: [1,2]={vip_12_count} | [3,4]={vip_34_count}")
