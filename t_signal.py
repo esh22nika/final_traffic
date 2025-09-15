@@ -53,7 +53,7 @@ def get_zookeeper_connection():
         proxy.ping()
         return proxy
     except Exception as e:
-        print(f"[{MY_NAME}] ❌ ZooKeeper connection failed: {e}")
+        print(f"[{MY_NAME}] ZooKeeper connection failed: {e}")
         return None
 
 
@@ -63,11 +63,11 @@ def test_zookeeper_connection():
         proxy = get_zookeeper_connection()
         if proxy:
             response = proxy.ping()
-            print(f"[{MY_NAME}] ✅ Successfully connected to ZooKeeper: {response}")
+            print(f"[{MY_NAME}] Successfully connected to ZooKeeper: {response}")
             return True
         return False
     except Exception as e:
-        print(f"[{MY_NAME}] ❌ FATAL: Could not connect to ZooKeeper at {ZOOKEEPER_IP}. Error: {e}")
+        print(f"[{MY_NAME}] FATAL: Could not connect to ZooKeeper at {ZOOKEEPER_IP}. Error: {e}")
         return False
 
 
@@ -77,7 +77,7 @@ def test_zookeeper_connection():
 def traffic_detection_loop():
     """High-frequency traffic simulation to test load balancing and scaling."""
     if not test_zookeeper_connection():
-        print(f"[{MY_NAME}] 🛑 Cannot start traffic simulation - ZooKeeper unreachable")
+        print(f"[{MY_NAME}] Cannot start traffic simulation - ZooKeeper unreachable")
         return
 
     burst_counter = 0
@@ -86,7 +86,7 @@ def traffic_detection_loop():
         burst_counter += 1
         burst_start_time = time.time()
 
-        print(f"\n[{MY_NAME}] 🚦 Starting burst #{burst_counter} with {REQUEST_BURST_SIZE} requests...")
+        print(f"\n[{MY_NAME}] Starting burst #{burst_counter} with {REQUEST_BURST_SIZE} requests...")
 
         # Create threads for concurrent requests
         threads = []
@@ -112,11 +112,11 @@ def traffic_detection_loop():
                 request_stats["total_burst_time"] = total_burst_time
                 request_stats["average_burst_response_time"] = total_burst_time / request_stats["burst_count"]
 
-        print(f"[{MY_NAME}] ✅ Burst #{burst_counter} completed in {burst_duration:.2f}s")
+        print(f"[{MY_NAME}] Burst #{burst_counter} completed in {burst_duration:.2f}s")
 
         # Random wait before next burst
         sleep_time = random.randint(REQUEST_INTERVAL_MIN, REQUEST_INTERVAL_MAX)
-        print(f"[{MY_NAME}] 💤 Waiting {sleep_time}s before next burst...")
+        print(f"[{MY_NAME}] Waiting {sleep_time}s before next burst...")
         time.sleep(sleep_time)
 
 
@@ -139,17 +139,17 @@ def send_traffic_request(request_index, burst_number):
             # Generate VIP vehicle details
             vehicle_id = f"VIP-{uuid.uuid4().hex[:6]}"
             priority = random.randint(1, 4)  # 1=ambulance, 2=fire, 3=police, 4=vip
-            vehicle_types = {1: "🚑 AMBULANCE", 2: "🚒 FIRE", 3: "🚓 POLICE", 4: "🚗 VIP"}
-            vehicle_type = vehicle_types.get(priority, "🚗 UNKNOWN")
+            vehicle_types = {1: "AMBULANCE", 2: "FIRE", 3: "POLICE", 4: "VIP"}
+            vehicle_type = vehicle_types.get(priority, "UNKNOWN")
 
             print(
-                f"[{MY_NAME}] 🚨 Detected {vehicle_type} {vehicle_id} (P{priority}) at signal {sensed_signal} → {target_pair}")
+                f"[{MY_NAME}] Detected {vehicle_type} {vehicle_id} (P{priority}) at signal {sensed_signal} → {target_pair}")
             result = proxy.vip_arrival(target_pair, priority, vehicle_id)
 
             with stats_lock:
                 request_stats["vip_requests"] += 1
         else:
-            print(f"[{MY_NAME}] 🚗 Detected normal traffic at signal {sensed_signal} → {target_pair}")
+            print(f"[{MY_NAME}] Detected normal traffic at signal {sensed_signal} → {target_pair}")
             result = proxy.signal_controller(target_pair)
 
             with stats_lock:
@@ -158,7 +158,7 @@ def send_traffic_request(request_index, burst_number):
         end_time = time.time()
         response_time = end_time - start_time
 
-        print(f"[{MY_NAME}] ✅ Request {request_id} successful in {response_time:.2f}s")
+        print(f"[{MY_NAME}] Request {request_id} successful in {response_time:.2f}s")
 
         with stats_lock:
             request_stats["successful_requests"] += 1
@@ -167,7 +167,7 @@ def send_traffic_request(request_index, burst_number):
     except Exception as e:
         end_time = time.time()
         response_time = end_time - start_time
-        print(f"[{MY_NAME}] ❌ Request {request_id} failed for {target_pair} after {response_time:.2f}s. Error: {e}")
+        print(f"[{MY_NAME}] Request {request_id} failed for {target_pair} after {response_time:.2f}s. Error: {e}")
 
         with stats_lock:
             request_stats["failed_requests"] += 1
@@ -329,13 +329,13 @@ def format_time(ts):
 # -------------------------
 if __name__ == "__main__":
     print("=" * 70)
-    print(f"🚗 OPTIMIZED TRAFFIC SIGNAL CLIENT [{MY_NAME}]")
+    print(f"OPTIMIZED TRAFFIC SIGNAL CLIENT [{MY_NAME}]")
     print("=" * 70)
-    print(f"[{MY_NAME}] ⚡ Performance optimized: High-frequency request bursts")
-    print(f"[{MY_NAME}] 🌐 Connecting to ZooKeeper: {ZOOKEEPER_IP}")
-    print(f"[{MY_NAME}] ⏱  Initial clock skew: {local_skew:+.2f}s")
-    print(f"[{MY_NAME}] 📈 Burst size: {REQUEST_BURST_SIZE} requests")
-    print(f"[{MY_NAME}] 🎯 VIP probability: {VIP_PROBABILITY * 100:.1f}%")
+    print(f"[{MY_NAME}] Performance optimized: High-frequency request bursts")
+    print(f"[{MY_NAME}] Connecting to ZooKeeper: {ZOOKEEPER_IP}")
+    print(f"[{MY_NAME}] Initial clock skew: {local_skew:+.2f}s")
+    print(f"[{MY_NAME}] Burst size: {REQUEST_BURST_SIZE} requests")
+    print(f"[{MY_NAME}] VIP probability: {VIP_PROBABILITY * 100:.1f}%")
     print("=" * 70)
 
     # Start background threads
@@ -359,13 +359,13 @@ if __name__ == "__main__":
     server.register_function(reset_stats, "reset_stats")
     server.register_function(ping, "ping")
 
-    print(f"[{MY_NAME}] 🚀 Traffic client ready on port {MY_PORT}")
-    print(f"[{MY_NAME}] 📊 RPC interface available for monitoring and control")
+    print(f"[{MY_NAME}] Traffic client ready on port {MY_PORT}")
+    print(f"[{MY_NAME}] RPC interface available for monitoring and control")
 
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print(f"\n[{MY_NAME}] 🛑 Shutting down...")
+        print(f"\n[{MY_NAME}] Shutting down...")
 
         # Print final statistics
         with stats_lock:
@@ -378,5 +378,6 @@ if __name__ == "__main__":
                     f"[{MY_NAME}] VIP requests: {request_stats['vip_requests']} ({(request_stats['vip_requests'] / request_stats['total_requests']) * 100:.1f}%)")
                 print(f"[{MY_NAME}] Bursts completed: {request_stats['burst_count']}")
 
-        print(f"[{MY_NAME}] 👋 Goodbye!")
+        print(f"[{MY_NAME}] Goodbye!")
+
 
