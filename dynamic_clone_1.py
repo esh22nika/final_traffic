@@ -10,8 +10,8 @@ import uuid
 
 # Configuration for dynamic clone
 CLIENTS = {
-    "t_signal": "http://localhost:7000",
-    "p_signal": "http://localhost:9000",
+    "t_signal": "http://192.168.0.165:7000",
+    "p_signal": "http://192.168.0.176:9000",
 }
 PEDESTRIAN_IP = CLIENTS["p_signal"]
 RESPONSE_TIMEOUT = 3
@@ -53,3 +53,4 @@ if __name__ == "__main__":
         server.serve_forever()
     except KeyboardInterrupt:
         print(f"\n[{CONTROLLER_NAME}] Shutting down...")
+
