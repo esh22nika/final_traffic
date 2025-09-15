@@ -553,7 +553,7 @@ class ZooKeeperLoadBalancer:
     def request_data_access(self, client_id, data_type, operation_type):
         """Handle RTO officer data access requests with Reader-Writer logic"""
         self.log_separator(f"DATA ACCESS REQUEST: {client_id}")
-        print(f"[ZOOKEEPER] 📋 Request from {client_id}: {data_type} ({operation_type})")
+        print(f"[ZOOKEEPER] Request from {client_id}: {data_type} ({operation_type})")
 
         if operation_type == "read":
             # Get available server for reading
@@ -565,7 +565,7 @@ class ZooKeeperLoadBalancer:
                     port_mapping = {'server_1': 7001, 'server_2': 7002, 'server_3': 7003}
                     server_port = port_mapping.get(server_name, 7001)
 
-                    print(f"[ZOOKEEPER] ✅ READ access granted to {client_id} on {server_name}")
+                    print(f"[ZOOKEEPER] READ access granted to {client_id} on {server_name}")
                     return {
                         'access_granted': True,
                         'server_name': server_name,
@@ -575,14 +575,14 @@ class ZooKeeperLoadBalancer:
                         'client_id': client_id
                     }
 
-            print(f"[ZOOKEEPER] ❌ READ access denied to {client_id} - No servers available")
+            print(f"[ZOOKEEPER] READ access denied to {client_id} - No servers available")
             return {'access_granted': False, 'reason': 'No servers available for reading'}
 
         elif operation_type == "write":
             # Try to acquire write lock on all replicas
             locked_servers = self.replica_manager.acquire_write_lock(data_type)
             if locked_servers:
-                print(f"[ZOOKEEPER] ✅ WRITE access granted to {client_id} on {locked_servers}")
+                print(f"[ZOOKEEPER] WRITE access granted to {client_id} on {locked_servers}")
                 return {
                     'access_granted': True,
                     'locked_servers': locked_servers,
@@ -590,12 +590,12 @@ class ZooKeeperLoadBalancer:
                     'client_id': client_id
                 }
 
-            print(f"[ZOOKEEPER] ❌ WRITE access denied to {client_id} - Writer active or readers present")
+            print(f"[ZOOKEEPER] WRITE access denied to {client_id} - Writer active or readers present")
             return {'access_granted': False, 'reason': 'Write lock unavailable - readers active or writer present'}
 
     def release_data_access(self, client_id, server_name, operation_type):
         """Release data access locks"""
-        print(f"[ZOOKEEPER] 🔓 {client_id} releasing {operation_type} lock on {server_name}")
+        print(f"[ZOOKEEPER] {client_id} releasing {operation_type} lock on {server_name}")
 
         if operation_type == "read":
             self.replica_manager.release_read_lock(server_name)
@@ -606,12 +606,12 @@ class ZooKeeperLoadBalancer:
 
     def write_data(self, client_id, locked_servers, operation, *args, **kwargs):
         """Perform write operation on all replicas"""
-        print(f"[ZOOKEEPER] ✏️ {client_id} performing write operation: {operation}")
+        print(f"[ZOOKEEPER] {client_id} performing write operation: {operation}")
 
         results = self.replica_manager.replicate_write(locked_servers, operation, *args, **kwargs)
         self.replica_manager.release_write_lock(locked_servers)
 
-        print(f"[ZOOKEEPER] ✅ Write operation completed on {len(locked_servers)} replicas")
+        print(f"[ZOOKEEPER] Write operation completed on {len(locked_servers)} replicas")
         return results
 
 class DataReplicaManager:
