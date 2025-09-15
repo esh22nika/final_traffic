@@ -18,7 +18,7 @@ RESPONSE_TIMEOUT = 15  # Reduced timeout
 VIP_CROSSING_TIME = 0.5  # Drastically reduced from 4 seconds
 CONTROLLER_PORT = 8000
 CONTROLLER_NAME = "CONTROLLER"
-ZOOKEEPER_URL = "http://192.168.0.111:6000"
+ZOOKEEPER_URL = "http://localhost:6000"
 
 server_skew = 0.0
 state_lock = threading.Lock()
@@ -430,4 +430,5 @@ if __name__ == "__main__":
 
         print(f"[MUTEX-STATE] Current intersection holder: {current}")
         print(f"[MUTEX-STATE] VIP queues: [1,2]={vip_12_count} | [3,4]={vip_34_count}")
+
 
