@@ -10,7 +10,7 @@ import sys
 NUM_CLIENTS = 5  # Increased number of clients for more activity
 READ_PROBABILITY = 0.6  # 60% reads, 40% writes for a better balance
 WRITE_PROBABILITY = 1 - READ_PROBABILITY  # Explicitly defined for clarity
-ZOOKEEPER_URL = "http://192.168.0.168:6000"
+ZOOKEEPER_URL = "http://192.168.0.111:6000"
 
 
 # --- END CONFIGURATION ---
@@ -287,5 +287,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
